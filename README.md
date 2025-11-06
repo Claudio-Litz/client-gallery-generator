@@ -1,39 +1,45 @@
-# Client Gallery Generator
+# 📸 Photon Client Gallery
 
-A professional, self-hosted web application for photographers to upload event photos and deliver them to clients in a beautiful, private, and shareable web gallery.
+> A professional, self-hosted platform designed to elevate how photographers deliver their final work. This tool replaces impersonal file-sharing links with a beautiful, brandable, and private gallery experience for your clients.
 
-## The Problem
 
-Photographers spend hours shooting and editing, only to deliver their final work through a cold, impersonal link (like Google Drive, Dropbox, or WeTransfer). These methods are often clunky, have expiration dates, and don't reflect the premium quality of the photographer's brand.
 
-## The Solution
+This application provides a simple, password-protected admin panel for photographers to create and manage client events. Clients receive a unique, shareable link to a stunning, responsive gallery where they can view and download their photos.
 
-This application provides a simple admin panel for photographers to:
-1.  Create a new gallery (e.g., "Smith Wedding").
-2.  Upload all the photos for that event.
-3.  Generate a single, beautiful, and shareable link (`your-site.com/gallery/abc-123`).
+---
 
-The client receives a link to a stunning, responsive, and easy-to-use gallery page to view, download, and share their photos.
+### ✨ Key Features
 
-### Key Features (MVP)
+* **Secure Admin Panel:** A password-protected dashboard for the photographer to manage all galleries.
+* **Intuitive Gallery Management:** Easily create, update, or delete galleries (e.g., "The Miller Wedding," "Sarah's Newborn Shoot").
+* **Drag-and-Drop Uploads:** A modern, multi-file uploader to add photos to a gallery quickly.
+* **Unique Link Generation:** Automatically generates a private, hard-to-guess URL for each client gallery.
+* **Stunning Client-Facing Template:** A single, responsive, and elegant HTML/CSS/JS template that showcases the photos beautifully on any device.
 
-* **Admin Panel:** A secure, password-protected dashboard for the photographer.
-* **Gallery Management:** Create, Read, Update, and Delete galleries.
-* **Multi-File Upload:** An easy-to-use drag-and-drop uploader for photos.
-* **Unique Link Generation:** Automatically generates a unique, hard-to-guess URL for each gallery.
-* **Beautiful Client-Facing Template:** A single, responsive, and elegant HTML/CSS/JS template that displays the photos.
+### 💻 Tech Stack
 
-### Tech Stack
+The core application is built with:
 
 * **Backend:** Python (Flask/Django) / Java (Spring Boot)
 * **Database:** PostgreSQL / MySQL / SQLite
-* **Frontend:** HTML, CSS, JavaScript (for the gallery template)
-* **File Storage:** Local server storage or cloud (S3, Google Cloud Storage)
+* **Frontend:** HTML, CSS, JavaScript (for the gallery template and admin panel)
+* **File Storage:** Local server storage or a cloud provider (e.S3, Google Cloud Storage)
 
-### Getting Started
+---
 
-1.  Clone this repository.
-2.  Install backend dependencies: `pip install -r requirements.txt`
-3.  Set up your `.env` file with database credentials.
+### 🚀 Getting Started
+
+1.  Clone this repository:
+    ```bash
+    git clone [https://github.com/your-username/photon-client-gallery.git](https://github.com/your-username/photon-client-gallery.git)
+    ```
+2.  Install backend dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  Configure your environment variables (`.env`) with database credentials and a secret key.
 4.  Run database migrations.
-5.  Start the server: `python app.py`
+5.  Start the application server:
+    ```bash
+    python app.py
+    ```
