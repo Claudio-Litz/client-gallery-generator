@@ -22,44 +22,36 @@ def gallery_list(request):
     return render(request, 'galleries/gallery_list.html', context)
 
 
+# galleries/views.py
+
 def gallery_detail(request, gallery_id):
     gallery = get_object_or_404(Gallery, pk=gallery_id)
 
-    # Lógica 1: Se a galeria NÃO for protegida
+    # 1. Se a galeria NÃO for protegida, libera o acesso direto
     if not gallery.is_protected:
         context = {'gallery': gallery}
         return render(request, 'galleries/gallery_detail.html', context)
 
-    # Lógica 2: Se for um POST (usuário enviou a senha)
+    # 2. Se o usuário está enviando a senha agora (Método POST)
     if request.method == 'POST':
         submitted_password = request.POST.get('password')
 
-        # --- MUDANÇA PRINCIPAL AQUI ---
-        # Verificando a senha usando o método hasheado
+        # Verifica a senha (usando o método seguro que criamos antes)
         if submitted_password and gallery.check_gallery_password(submitted_password):
-            # Senha CORRETA.
-            
-            # (Opcional, mas recomendado) Salvar na sessão que o usuário
-            # autenticou nesta galeria, para não pedir de novo.
-            request.session[f'gallery_auth_{gallery_id}'] = True
-            
+            # Senha CORRETA: Mostra a galeria
+            # Nota: Nós NÃO estamos mais salvando na sessão (request.session)
             context = {'gallery': gallery}
             return render(request, 'galleries/gallery_detail.html', context)
         else:
-            # Senha INCORRETA.
+            # Senha INCORRETA: Mostra erro
             context = {
                 'gallery': gallery,
                 'error': 'Senha incorreta. Tente novamente.'
             }
             return render(request, 'galleries/gallery_password_prompt.html', context)
 
-    # Lógica 3: Se for um GET (primeiro acesso)
-    
-    # (Opcional) Verificar se o usuário já está autenticado na sessão
-    if request.session.get(f'gallery_auth_{gallery_id}'):
-        context = {'gallery': gallery}
-        return render(request, 'galleries/gallery_detail.html', context)
-        
-    # Se não for POST e não estiver na sessão, pede a senha.
+    # 3. Se for qualquer outro acesso (GET), pede a senha.
+    # Removemos a verificação de sessão aqui. Toda vez que carregar a URL, pede senha.
     context = {'gallery': gallery}
     return render(request, 'galleries/gallery_password_prompt.html', context)
+
