@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Carrega as variáveis do arquivo .env para o ambiente
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',  # novo app
     
     # Nossas Apps
     'galleries.apps.GalleriesConfig', # Adicione esta linha
@@ -114,19 +120,38 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+if DEBUG:
+    # --- CONFIGURAÇÕES DE DESENVOLVIMENTO ---
+    # Use o sistema de arquivos local
+    DEFAULT_FILE_STORAGE = 'storages.backends.b2.B2Storage'
+    
+    # Onde as imagens serão lidas (a URL)
+    MEDIA_URL = '/media/'
+    
+    # Onde as imagens serão salvas (a pasta local)
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+else:
+    # --- CONFIGURAÇÕES DE PRODUÇÃO (Backblaze) ---
+    # (Tudo o que fizemos antes, agora está dentro do 'else')
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.b2.B2Storage'
 
-# O URL que o navegador usará para acessar os arquivos (ex: /media/photos/img.jpg)
-MEDIA_URL = '/media/'
-
-# O caminho no seu computador onde o Django salvará os arquivos físicos.
-# BASE_DIR é uma variável que o Django já definiu apontando para a raiz do seu projeto.
-MEDIA_ROOT = BASE_DIR / 'media'
+    # Credenciais do .env
+    AWS_ACCESS_KEY_ID = os.environ.get('B2_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('B2_APP_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.environ.get('B2_ENDPOINT_URL')
+    
+    # Configurações do B2
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}'
+    
+    # Onde as mídias serão salvas (caminho DENTRO do bucket)
+    MEDIA_ROOT = 'media/' 
+    # De onde as mídias serão lidas (URL pública do bucket)
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_ROOT}'
