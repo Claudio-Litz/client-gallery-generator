@@ -1,12 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseForbidden # Importação não usada, mas ok
+# Remova a importação não usada de HttpResponseForbidden
 from .models import Gallery, Photo
 from django.db.models import Q 
 
 def gallery_list(request):
-    """
-    View da lista de galerias, com a busca que implementamos.
-    """
+    # ... (sem mudanças aqui)
     search_query = request.GET.get('q', '') 
     
     if search_query:
@@ -25,14 +23,9 @@ def gallery_list(request):
 
 
 def gallery_detail(request, gallery_id):
-    """
-    View de detalhe da galeria.
-    Esta é a versão CORRIGIDA para bater com seu models.py.
-    """
     gallery = get_object_or_404(Gallery, pk=gallery_id)
 
     # Lógica 1: Se a galeria NÃO for protegida
-    # CORREÇÃO: Voltamos a usar 'is_protected' [cite: 78]
     if not gallery.is_protected:
         context = {'gallery': gallery}
         return render(request, 'galleries/gallery_detail.html', context)
@@ -41,10 +34,15 @@ def gallery_detail(request, gallery_id):
     if request.method == 'POST':
         submitted_password = request.POST.get('password')
 
-        # CORREÇÃO: Voltamos à comparação direta de texto 
-        # (Isso é inseguro, mas é o que o seu modelo suporta agora)
-        if submitted_password == gallery.password:
+        # --- MUDANÇA PRINCIPAL AQUI ---
+        # Verificando a senha usando o método hasheado
+        if submitted_password and gallery.check_gallery_password(submitted_password):
             # Senha CORRETA.
+            
+            # (Opcional, mas recomendado) Salvar na sessão que o usuário
+            # autenticou nesta galeria, para não pedir de novo.
+            request.session[f'gallery_auth_{gallery_id}'] = True
+            
             context = {'gallery': gallery}
             return render(request, 'galleries/gallery_detail.html', context)
         else:
@@ -56,5 +54,12 @@ def gallery_detail(request, gallery_id):
             return render(request, 'galleries/gallery_password_prompt.html', context)
 
     # Lógica 3: Se for um GET (primeiro acesso)
+    
+    # (Opcional) Verificar se o usuário já está autenticado na sessão
+    if request.session.get(f'gallery_auth_{gallery_id}'):
+        context = {'gallery': gallery}
+        return render(request, 'galleries/gallery_detail.html', context)
+        
+    # Se não for POST e não estiver na sessão, pede a senha.
     context = {'gallery': gallery}
     return render(request, 'galleries/gallery_password_prompt.html', context)
