@@ -1,45 +1,80 @@
 # 📸 Photon Client Gallery
 
-> A professional, self-hosted platform designed to elevate how photographers deliver their final work. This tool replaces impersonal file-sharing links with a beautiful, brandable, and private gallery experience for your clients.
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![Django Version](https://img.shields.io/badge/django-4.2%2B-green)](https://www.djangoproject.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Photon Client Gallery** is a professional-grade web platform designed for photographers to streamline the process of delivering high-quality images to clients. It bridges the gap between raw file management and a polished, mobile-responsive user experience.
 
 
 
-This application provides a simple, password-protected admin panel for photographers to create and manage client events. Clients receive a unique, shareable link to a stunning, responsive gallery where they can view and download their photos.
+## 🌟 Key Features
 
----
-
-### ✨ Key Features
-
-* **Secure Admin Panel:** A password-protected dashboard for the photographer to manage all galleries.
-* **Intuitive Gallery Management:** Easily create, update, or delete galleries (e.g., "The Miller Wedding," "Sarah's Newborn Shoot").
-* **Drag-and-Drop Uploads:** A modern, multi-file uploader to add photos to a gallery quickly.
-* **Unique Link Generation:** Automatically generates a private, hard-to-guess URL for each client gallery.
-* **Stunning Client-Facing Template:** A single, responsive, and elegant HTML/CSS/JS template that showcases the photos beautifully on any device.
-
-### 💻 Tech Stack
-
-The core application is built with:
-
-* **Backend:** Python (Flask/Django) / Java (Spring Boot)
-* **Database:** PostgreSQL / MySQL / SQLite
-* **Frontend:** HTML, CSS, JavaScript (for the gallery template and admin panel)
-* **File Storage:** Local server storage or a cloud provider (e.S3, Google Cloud Storage)
+* **Bulk Administrative Upload:** Integrated drag-and-drop functionality for uploading entire photoshoots simultaneously via the Django Admin.
+* **Modern Viewing Experience:** Powered by **Fancybox**, providing high-performance zooming, full-screen modes, and touch-gestures for mobile users.
+* **Fully Responsive Architecture:** Custom-engineered CSS Media Queries ensure a seamless experience across desktops, tablets, and smartphones.
+* **Optimized Image Processing:** Backend integration with **Pillow** for automatic image handling and metadata management.
+* **Client-Centric Design:** Clean, distraction-free interface focused on visual storytelling.
 
 ---
 
-### 🚀 Getting Started
+## 🛠️ Tech Stack
 
-1.  Clone this repository:
+* **Backend:** [Django](https://www.djangoproject.com/) (Python Web Framework)
+* **Database:** SQLite (Development) / PostgreSQL (Production ready)
+* **Image Processing:** [Pillow](https://python-pillow.org/)
+* **Frontend Enhancements:** [Fancybox v5](https://fancyapps.com/fancybox/)
+* **Admin Extensions:** `django-multiupload-admin`
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* Python 3.10+
+* Pip (Python Package Manager)
+
+### Installation
+
+1.  **Clone the repository:**
     ```bash
     git clone [https://github.com/your-username/photon-client-gallery.git](https://github.com/your-username/photon-client-gallery.git)
+    cd photon-client-gallery
     ```
-2.  Install backend dependencies:
+
+2.  **Install dependencies:**
     ```bash
-    pip install -r requirements.txt
+    python -m pip install django pillow django-multiupload-admin django-storages
     ```
-3.  Configure your environment variables (`.env`) with database credentials and a secret key.
-4.  Run database migrations.
-5.  Start the application server:
+
+3.  **Run Migrations:**
     ```bash
-    python app.py
+    python manage.py migrate
     ```
+
+4.  **Create a Superuser (Admin):**
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+5.  **Start the Development Server:**
+    ```bash
+    python manage.py runserver
+    ```
+
+Visit `http://127.0.0.1:8000/admin` to begin creating galleries and uploading photos.
+
+---
+
+## 📂 Project Structure
+
+```text
+├── galleries/
+│   ├── static/          # Custom CSS and UI optimization
+│   ├── templates/       # Professional HTML5 templates
+│   ├── models.py        # Gallery and Photo relational schema
+│   ├── admin.py         # Multi-upload configuration
+│   └── views.py         # High-level logic for gallery rendering
+├── media/               # User-uploaded content (Images)
+└── photon_gallery/      # Core project settings
