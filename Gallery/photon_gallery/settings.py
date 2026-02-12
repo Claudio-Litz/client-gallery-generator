@@ -24,21 +24,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$hmhojq4st^wbyx81y^ejfobfy4pz7wn+jmp$@*d3$^u3-y@+#'
+# SECURITY: read sensitive values from environment
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'unsafe-development-key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG from env (default False). Use '1', 'true', or 'yes' to enable.
+DEBUG = str(os.environ.get('DJANGO_DEBUG', 'False')).lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'localhost:8000', '127.0.0.1:8000']
+# Hosts and CSRF trusted origins
+raw_allowed = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [h.strip() for h in raw_allowed.split(',') if h.strip()]
 
-# CSRF Trusted Origins for development
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'https://localhost:8000',
-    'https://127.0.0.1:8000',
-]
+# Build CSRF_TRUSTED_ORIGINS from allowed hosts (add scheme if missing)
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    if host.startswith('http://') or host.startswith('https://'):
+        CSRF_TRUSTED_ORIGINS.append(host)
+    else:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{host}')
+        CSRF_TRUSTED_ORIGINS.append(f'http://{host}')
 
 
 # Application definition
@@ -50,14 +53,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages',  # novo app
-    
-    # Nossas Apps
-    'galleries.apps.GalleriesConfig', # Adicione esta linha
+    'storages',
+
+    # Project apps
+    'galleries.apps.GalleriesConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -133,33 +137,45 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 if DEBUG:
-    # --- CONFIGURAÇÕES DE DESENVOLVIMENTO ---
-    # Use o sistema de arquivos local
-    DEFAULT_FILE_STORAGE = 'storages.backends.b2.B2Storage'
-    
-    # Onde as imagens serão lidas (a URL)
+    # Development: local file storage
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
     MEDIA_URL = '/media/'
-    
-    # Onde as imagens serão salvas (a pasta local)
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+    # Helpful defaults in dev
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 else:
-    # --- CONFIGURAÇÕES DE PRODUÇÃO (Backblaze) ---
-    # (Tudo o que fizemos antes, agora está dentro do 'else')
-    
+    # Production: require SECRET_KEY and configure secure defaults
+    if SECRET_KEY == 'unsafe-development-key':
+        raise RuntimeError('DJANGO_SECRET_KEY must be set in production environment')
+
+    # Security headers and cookies
+    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').lower() in ('1', 'true', 'yes')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+
+    # Static files via WhiteNoise
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+    # Backblaze B2 or object storage configuration
     DEFAULT_FILE_STORAGE = 'storages.backends.b2.B2Storage'
 
-    # Credenciais do .env
+    # Credentials (must be set in env)
     AWS_ACCESS_KEY_ID = os.environ.get('B2_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('B2_APP_KEY')
     AWS_STORAGE_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
     AWS_S3_ENDPOINT_URL = os.environ.get('B2_ENDPOINT_URL')
-    
-    # Configurações do B2
+
     AWS_S3_FILE_OVERWRITE = False
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}'
-    
-    # Onde as mídias serão salvas (caminho DENTRO do bucket)
-    MEDIA_ROOT = 'media/' 
-    # De onde as mídias serão lidas (URL pública do bucket)
+
+    MEDIA_ROOT = 'media/'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_ROOT}'
